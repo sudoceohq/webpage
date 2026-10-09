@@ -1,0 +1,13 @@
+---
+import { render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { publishedArticles, formatDate } from '../../lib/articles';
+export async function getStaticPaths() {
+  return (await publishedArticles()).map(article => ({ params: { id: article.id }, props: { article } }));
+}
+interface Props { article: CollectionEntry<'articles'>; }
+const { article } = Astro.props;
+const { Content } = await render(article);
+---
+<Layout title={article.data.title} description={article.data.description}><article class="article-detail"><a href="/writing/" class="eyebrow red">← Back to writing</a><header><span class="eyebrow muted">{formatDate(article.data.pubDate)} / {article.data.origin === 'github-ai' ? `AI-assisted · Reviewed by ${article.data.reviewedBy}` : 'By Egor Markowskij'}</span><h1>{article.data.title}</h1><p>{article.data.description}</p></header><div class="prose"><Content /></div>{article.data.sourceUrls.length > 0 && <aside class="article-sources"><h2 class="eyebrow">Sources</h2><ul>{article.data.sourceUrls.map(url => <li><a href={url}>{url}</a></li>)}</ul></aside>}</article></Layout>

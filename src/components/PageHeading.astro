@@ -1,0 +1,5 @@
+---
+interface Props { number: string; label: string; title: string; intro: string; }
+const { number, label, title, intro } = Astro.props;
+---
+<section class="page-heading"><div class="hero-meta"><span class="eyebrow red">{number} — {label}</span><span class="eyebrow">Egor Markowskij / Sudoceo</span></div><h1>{title}<span class="red">.</span></h1><p>{intro}</p></section>

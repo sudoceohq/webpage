@@ -1,0 +1,82 @@
+---
+import '../styles/global.css';
+import { navigation, site } from '../lib/site';
+import Arrow from '../components/Arrow.astro';
+interface Props { title?: string; description?: string; noindex?: boolean; }
+const { title, description = site.description, noindex = false } = Astro.props;
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site) : undefined;
+const pageTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.alias}`;
+const current = Astro.url.pathname;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={site.name} />
+    <meta name="theme-color" content="#f2f0e9" />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    {canonical && <meta property="og:url" content={canonical} />}
+    {Astro.site && <meta property="og:image" content={new URL('/social.png', Astro.site)} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title="Egor Markowskij — Writing" href="/rss.xml" />
+    <script is:inline>
+      (() => {
+        let saved;
+        try { saved = localStorage.getItem('theme'); } catch {}
+        const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="site-shell">
+      <header class="site-header">
+        <a class="wordmark" href="/" aria-label="Sudoceo — home">sudoceo<span class="red">.</span></a>
+        <nav aria-label="Main navigation">
+          {navigation.map(({ title, href }, index) => <a href={href} aria-current={current === href || (href !== '/' && current.startsWith(href)) ? 'page' : undefined}><span class="nav-number">0{index + 1}</span>{title}</a>)}
+        </nav>
+        <button class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none"><circle cx="12" cy="12" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M12 5a7 7 0 0 1 0 14Z" fill="currentColor"/></svg>
+          <span class="theme-label">Dark</span>
+        </button>
+      </header>
+      <main id="main" tabindex="-1"><slot /></main>
+      <footer class="site-footer">
+        <a href="/" class="footer-name">Egor Markowskij<span class="muted"> / Sudoceo</span></a>
+        <div class="footer-links">{site.github && <a href={site.github}>GitHub <Arrow diagonal /></a>}<a href="/rss.xml">RSS <Arrow diagonal /></a><a href="/contact/">Get in touch <Arrow diagonal /></a></div>
+        <span class="eyebrow">© {new Date().getFullYear()} · Independent by design</span>
+      </footer>
+    </div>
+    <script>
+      const button = document.querySelector<HTMLButtonElement>('.theme-toggle');
+      const label = document.querySelector<HTMLElement>('.theme-label');
+      const media = matchMedia('(prefers-color-scheme: dark)');
+      function updateTheme(dark: boolean) {
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        button?.setAttribute('aria-pressed', String(dark));
+        button?.setAttribute('aria-label', `Switch to ${dark ? 'light' : 'dark'} mode`);
+        if (label) label.textContent = dark ? 'Light' : 'Dark';
+      }
+      updateTheme(document.documentElement.dataset.theme === 'dark');
+      button?.addEventListener('click', () => {
+        const dark = document.documentElement.dataset.theme !== 'dark';
+        updateTheme(dark);
+        try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch {}
+      });
+      media.addEventListener('change', ({ matches }) => {
+        let saved;
+        try { saved = localStorage.getItem('theme'); } catch {}
+        if (!saved) updateTheme(matches);
+      });
+    </script>
+  </body>
+</html>

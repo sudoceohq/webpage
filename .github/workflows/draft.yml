@@ -1,0 +1,39 @@
+name: Draft from GitHub activity
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: Public source repository (owner/name)
+        required: true
+        default: sudoceohq/argocd
+      author:
+        description: GitHub commit author login
+        required: true
+        default: sudoceohq
+      since:
+        description: Start date (YYYY-MM-DD)
+        required: true
+permissions:
+  contents: read
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate an unpublished draft
+        env:
+          SOURCE_REPO: ${{ inputs.repository }}
+          SOURCE_AUTHOR: ${{ inputs.author }}
+          SOURCE_SINCE: ${{ inputs.since }}
+          GITHUB_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WORKERS_AI_API_TOKEN }}
+        run: node scripts/github-draft.mjs "$SOURCE_REPO" "$SOURCE_AUTHOR" "$SOURCE_SINCE"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unpublished-drafts
+          path: content/articles/*.md
+          retention-days: 14

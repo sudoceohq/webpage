@@ -1,0 +1,6 @@
+# Require owner review on content and publication logic using branch protection.
+/content/ @sudoceohq
+/src/content.config.ts @sudoceohq
+/src/lib/publication.mjs @sudoceohq
+/scripts/github-draft.mjs @sudoceohq
+/.github/ @sudoceohq
