@@ -62,6 +62,12 @@ Cloudflare Git integration can build production branches automatically; enabling
 
 Official setup: [Astro on Cloudflare Pages](https://developers.cloudflare.com/pages/framework-guides/deploy-an-astro-site/) and [build configuration](https://developers.cloudflare.com/pages/configuration/build-configuration/). AI integration: [Workers AI REST API](https://developers.cloudflare.com/workers-ai/get-started/rest-api/).
 
+## Verification at handoff
+
+The production build passed with no TypeScript diagnostics. Six content/generator tests and eighteen desktop/mobile browser tests passed locally, including automated WCAG checks. All five pages were visually inspected; homepage desktop, mobile, and dark previews are saved locally in the ignored `previews/` folder.
+
+GitHub's initial hosted check could not start: the job annotation reports failed account payments or a spending limit. Resolve GitHub billing/Actions availability, then rerun [the check](https://github.com/sudoceohq/webpage/actions/runs/37900043905). No Cloudflare deployment, DNS changes, live AI generation, or publication took place. Workers AI credentials and repository review enforcement remain to be configured.
+
 ## Design and factual sources
 
 The design follows the supplied written “Modern Executive” direction: oversized black type, off-white canvas, asymmetric grids, editorial numbering, and restrained red. No reference image was available to inspect. Work currently describes only the public `sudoceohq/argocd` repository, verified against its [README](https://github.com/sudoceohq/argocd). No employment history, achievements, or deployment claims are added.
