@@ -49,24 +49,32 @@ On GitHub, use **Actions → Draft from GitHub activity → Run workflow**. Add 
 
 The source window is bounded to 500 commits and 45 KB; select a shorter period if exceeded. Commit messages describe intent, not proven deployment outcomes. Human review remains necessary for factual correctness, attribution, and safe content.
 
-## Cloudflare Pages preparation
+## Deployment
 
-The site builds to static `dist/`; no server adapter or paid runtime is required.
+Live site: **https://sudoceo.com**. Cloudflare Pages project: `sudoceo`; fallback URL: https://sudoceo.pages.dev.
 
-1. In Cloudflare **Workers & Pages**, create a **Pages** project and connect `sudoceohq/webpage`.
-2. Select the Astro preset. Build command: `npm run build`. Output directory: `dist`. Set `NODE_VERSION=22`, `ASTRO_TELEMETRY_DISABLED=1`, and `SITE_URL=https://sudoceo.com`.
-3. Keep automatic production deployments disabled until you approve the website and content. If previews must remain private, configure Cloudflare Access before sharing them.
-4. Deploy the reviewed commit, then add `sudoceo.com` as a custom domain and follow Cloudflare's DNS instructions. Verify canonical URLs, RSS, sitemap, 404 handling, and email links on the live domain.
+On 10 October 2026 (Europe/Warsaw), reviewed commit `bbf2a73` was deployed as production deployment `09600449-ec73-4da1-a4e3-820e62262a37`. The apex domain is active with a proxied CNAME to `sudoceo.pages.dev`. Existing email records were preserved.
 
-Cloudflare Git integration can build production branches automatically; enabling it is an explicit publishing step. This repository does not include an automatic deployment workflow or change DNS. `_headers` supplies basic browser security headers; `404.astro` prevents a static Pages deployment from falling back to an SPA.
+Cloudflare's Git installation returned error `8000011`, so this release used Direct Upload of the locally tested `dist/` assets through the Cloudflare API. The project has no Git source integration and does not automatically deploy on push. GitHub remains the source of truth.
 
-Official setup: [Astro on Cloudflare Pages](https://developers.cloudflare.com/pages/framework-guides/deploy-an-astro-site/) and [build configuration](https://developers.cloudflare.com/pages/configuration/build-configuration/). AI integration: [Workers AI REST API](https://developers.cloudflare.com/workers-ai/get-started/rest-api/).
+For a subsequent approved release, authenticate the official Wrangler CLI, then:
 
-## Verification at handoff
+```sh
+ASTRO_TELEMETRY_DISABLED=1 npm run build
+npm test
+npm run test:e2e
+npx wrangler pages deploy dist --project-name sudoceo --branch main
+```
 
-The production build passed with no TypeScript diagnostics. Six content/generator tests and eighteen desktop/mobile browser tests passed locally, including automated WCAG checks. All five pages were visually inspected; homepage desktop, mobile, and dark previews are saved locally in the ignored `previews/` folder.
+Review the changes and article approvals before deploying. The site is static; no server adapter or paid runtime is needed. `SITE_URL` defaults to `https://sudoceo.com`. Upload only `dist/`, never the repository or ignored research/preview folders. `_headers` supplies browser security headers; the custom 404 prevents an SPA fallback.
 
-GitHub's initial hosted check could not start: the job annotation reports failed account payments or a spending limit. Resolve GitHub billing/Actions availability, then rerun [the check](https://github.com/sudoceohq/webpage/actions/runs/37900043905). No Cloudflare deployment, DNS changes, live AI generation, or publication took place. Workers AI credentials and repository review enforcement remain to be configured.
+Official guidance: [Direct Upload](https://developers.cloudflare.com/pages/get-started/direct-upload/).
+
+## Verification
+
+The reviewed build passed with no TypeScript diagnostics. Six content/generator tests passed, and desktop/mobile browser checks passed during page implementation and refinement. Live checks passed for all five pages, RSS, sitemap, robots, and 404 responses. The welcome draft is absent from public routes and the feed. The live domain was visually inspected in the browser.
+
+GitHub check run [37998921517](https://github.com/sudoceohq/webpage/actions/runs/37998921517) passed. The earlier initial run was blocked by billing, but that is no longer the observed result for this release. Workers AI credentials and repository review enforcement remain to be configured; no live AI generation was run.
 
 ## Design and factual sources
 
