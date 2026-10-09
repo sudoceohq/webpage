@@ -70,6 +70,6 @@ GitHub's initial hosted check could not start: the job annotation reports failed
 
 ## Design and factual sources
 
-The design follows the supplied written “Modern Executive” direction: oversized black type, off-white canvas, asymmetric grids, editorial numbering, and restrained red. No reference image was available to inspect. Work currently describes only the public `sudoceohq/argocd` repository, verified against its [README](https://github.com/sudoceohq/argocd). No employment history, achievements, or deployment claims are added.
+The design follows the supplied written “Modern Executive” direction: oversized black type, off-white canvas, asymmetric grids, editorial numbering, and restrained red. No reference image was available to inspect. Professional history, education, course certificates, languages, and OCR contribution descriptions were verified against the supplied LinkedIn profile. Project summaries were corroborated in LibraCircu, ThriftyStack, and the two OCR repositories. Private source repositories are not linked, and configuration does not imply a verified production deployment. The public Management GitOps entry links to `sudoceohq/argocd`.
 
 Public contact: `egor.a.markowskij@sudoceo.com`. Adjust copy in `src/pages/` and identity settings in `src/lib/site.ts`.

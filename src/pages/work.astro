@@ -2,12 +2,20 @@
 import Layout from '../layouts/Layout.astro';
 import PageHeading from '../components/PageHeading.astro';
 import Arrow from '../components/Arrow.astro';
+import { site } from '../lib/site';
+const projects = [
+  { name: 'ThriftyStack', category: 'Platform / Personal', role: 'Architecture & co-development · 2026–present', description: 'A hybrid cloud and homelab platform spanning cloud infrastructure, on-premises hosts, identity, secrets, and observability. I built the first version independently and lead the architecture and technical design of its second generation.', tags: ['OpenTofu', 'Ansible', 'Kubernetes', 'GCP', 'Vault'], href: site.linkedin, link: 'Project background on LinkedIn' },
+  { name: 'Document Recognition & Review', category: 'Application / Abasis.AI', role: 'Full-stack development · 2026', description: 'An invoice intake and review application: document uploads, asynchronous OCR, field correction, approval, and exports. My work covered frontend and backend features, automated tests, CI/CD, and Docker Compose deployment preparation.', tags: ['React', 'TypeScript', 'FastAPI', 'PostgreSQL', 'Docker'], href: site.linkedin, link: 'Project background on LinkedIn' },
+  { name: 'Provider-Agnostic OCR Engine', category: 'Service / Abasis.AI', role: 'Contributor · 2026', description: 'A stateless service that integrates OCR and extraction providers behind a stable API and grounds extracted fields in document geometry. I contributed validation, API contract safeguards, runtime support, and CI and release improvements.', tags: ['Python', 'REST APIs', 'OpenAPI', 'Docker'], href: site.linkedin, link: 'Project background on LinkedIn' },
+  { name: 'LibraCircu', category: 'Application / Personal', role: 'Personal project', description: 'A library management application with a book catalog, loans, reservations, staff administration, privacy controls, and Telegram integration. A React interface connects to a Python API and a Telegram bot.', tags: ['React', 'TypeScript', 'FastAPI', 'SQLAlchemy', 'Telegram'], href: undefined, link: 'Source repository is private' },
+  { name: 'Management GitOps', category: 'Infrastructure / Public source', role: 'Configuration & platform work', description: 'Argo CD configuration for a Talos management cluster, with Helm charts, staged Vault PKI, and Istio integration.', tags: ['Argo CD', 'Helm', 'Kubernetes'], href: 'https://github.com/sudoceohq/argocd', link: 'Explore the source on GitHub' },
+];
 ---
-<Layout title="Work" description="Public projects and selected work by Egor Markowskij, also known as Sudoceo.">
-  <PageHeading number="01" label="Work" title="In the making" intro="A look at the work, with the source close at hand." />
+<Layout title="Work" description="Selected full-stack applications, OCR services, and platform engineering projects by Egor Markowskij.">
+  <PageHeading number="01" label="Work" title="From code to systems" intro="Applications, infrastructure, and the work that connects them." />
   <section class="editorial-grid" aria-labelledby="projects-title">
-    <aside class="section-aside"><span class="eyebrow">The project index</span><h2 id="projects-title">Open<br /> by design.</h2><p>A public repository is a starting point. The details live in the source.</p></aside>
-    <div><a class="project-row" href="https://github.com/sudoceohq/argocd"><div class="project-number eyebrow red">01 / Infrastructure</div><div><h3>Management GitOps</h3><p>Argo CD configuration for a Talos management cluster, with Helm charts, staged Vault PKI, and Istio integration.</p><div class="tag-list flex flex-wrap gap-2"><span>Argo CD</span><span>Helm</span><span>Kubernetes</span></div><span class="eyebrow muted">Source: sudoceohq/argocd · README</span></div><Arrow diagonal /></a><div class="editorial-note"><span class="eyebrow red">An evolving index</span><p>More project notes will be added here as they are ready to share.</p></div></div>
+    <aside class="section-aside"><span class="eyebrow">The project index</span><h2 id="projects-title">Built with<br /> intent.</h2><p>Selected professional and personal work. My role is noted for each project.</p></aside>
+    <div>{projects.map((project, index) => <article class="project-row"><div class="project-number eyebrow red">{String(index + 1).padStart(2, '0')} / {project.category}</div><div><h3>{project.name}</h3><p class="eyebrow muted">{project.role}</p><p>{project.description}</p><div class="tag-list flex flex-wrap gap-2">{project.tags.map(tag => <span>{tag}</span>)}</div>{project.href ? <a class="eyebrow" href={project.href}>{project.link} ↗</a> : <span class="eyebrow muted">{project.link}</span>}</div></article>)}</div>
   </section>
   <div class="page-end"><span class="eyebrow">Have something in mind?</span><a class="text-link" href="/contact/">Let’s talk <Arrow diagonal /></a></div>
 </Layout>

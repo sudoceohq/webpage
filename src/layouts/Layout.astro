@@ -52,7 +52,7 @@ const current = Astro.url.pathname;
       <main id="main" tabindex="-1"><slot /></main>
       <footer class="site-footer">
         <a href="/" class="footer-name">Egor Markowskij<span class="muted"> / Sudoceo</span></a>
-        <div class="footer-links">{site.github && <a href={site.github}>GitHub <Arrow diagonal /></a>}<a href="/rss.xml">RSS <Arrow diagonal /></a><a href="/contact/">Get in touch <Arrow diagonal /></a></div>
+        <div class="footer-links">{site.github && <a href={site.github}>GitHub <Arrow diagonal /></a>}<a href={site.linkedin}>LinkedIn <Arrow diagonal /></a><a href="/rss.xml">RSS <Arrow diagonal /></a><a href="/contact/">Get in touch <Arrow diagonal /></a></div>
         <span class="eyebrow">© {new Date().getFullYear()} · Independent by design</span>
       </footer>
     </div>
