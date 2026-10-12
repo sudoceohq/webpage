@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1244" height="288" viewBox="0 0 1244 288" role="img" aria-labelledby="logo-title"><title id="logo-title">Sudoceo</title>
+<g fill="currentColor" fill-rule="evenodd">
+<g id="monogram" transform="translate(24 24) scale(1.064516129032258 0.967741935483871)"><path id="s-top" d="M100 0 L200 58 L200 116 L100 58 L36 95 L120 143 L86 163 L0 114 L0 58 Z"/><path id="s-bottom" d="M100 248 L0 190 L0 132 L100 190 L164 153 L80 105 L114 85 L200 134 L200 190 Z"/></g>
+<path id="letter-u" transform="translate(252 0)" d="M0 80 H52 V191 C52 205 59 214 68 214 C77 214 84 205 84 191 V80 H136 V192 C136 238 110 264 68 264 C26 264 0 238 0 192 Z"/>
+<path id="letter-d" transform="translate(400 0)" d="M144 24 H92 V91 C81 82 70 80 58 80 C24 80 0 115 0 172 C0 229 27 264 64 264 C77 264 87 258 94 250 V264 H144 Z M91 172 C91 147 82 132 67 132 C52 132 44 147 44 172 C44 197 52 212 67 212 C82 212 91 197 91 172 Z"/>
+<path id="letter-o-1" transform="translate(556 0)" d="M144 172 A72 92 0 1 1 0 172 A72 92 0 1 1 144 172 Z M97 172 A25 40 0 1 0 47 172 A25 40 0 1 0 97 172 Z"/>
+<path id="letter-c" transform="translate(712 0)" d="M139 146 H92 C88 137 81 132 72 132 C56 132 50 148 50 172 C50 196 56 212 72 212 C81 212 88 207 92 198 H139 C130 243 108 264 72 264 C27 264 0 229 0 172 C0 115 27 80 72 80 C108 80 130 101 139 146 Z"/>
+<path id="letter-e" transform="translate(864 0)" d="M144 194 H50 C53 212 61 220 76 220 C88 220 97 215 104 207 H141 C131 245 109 264 74 264 C28 264 0 229 0 172 C0 115 28 80 73 80 C119 80 144 115 144 172 Z M49 150 H95 C92 132 86 126 72 126 C59 126 52 134 49 150 Z"/>
+<path id="letter-o-2" transform="translate(1020 0)" d="M144 172 A72 92 0 1 1 0 172 A72 92 0 1 1 144 172 Z M97 172 A25 40 0 1 0 47 172 A25 40 0 1 0 97 172 Z"/>
+</g>
+<rect id="accent" x="1180" y="224" width="40" height="40" fill="var(--red, #c3392b)"/>
+</svg>
