@@ -20,9 +20,9 @@ I put the runtime on the management cluster as a Helm chart, and I switched the 
 
 Identity objects live in `ThriftyStack/controlplane`. A Crossplane OpenTofu Workspace applies groups `homelab-users` and `homelab-admins`, and OAuth2 applications for Grafana, Vault, and Proxmox. Ansible must not reconcile those objects.
 
-The Authentik containers were not in that rollout. Compose on a Proxmox VM kept the auth hostname reachable for the tunnel, but the stack was not in GitOps. Ansible site runs no longer deploy that Compose stack. DNS and the tunnel now target a NodePort on the management cluster.
+The Authentik containers were not in that rollout. Compose on a Proxmox VM kept the auth hostname reachable for the tunnel, but the stack was not in GitOps. I later stopped the Ansible site runs that deployed that Compose stack, and I pointed DNS and the tunnel at the management NodePort. Those cutovers are not in the two public sources.
 
-A GitOps IdP still needs secrets. The chart expects Secret `authentik-credentials` in namespace `authentik` before the first sync. Management Vault path `infra/authentik` holds the API token the Workspace uses. It is also the place to mirror `secret_key` and `pg_password` for recovery. A bootstrap script seeds those KV secrets.
+A GitOps IdP still needs secrets. The chart expects Secret `authentik-credentials` in namespace `authentik` before the first sync. Management Vault path `infra/authentik` holds the API token the Workspace uses. It is also the place to mirror `secret_key` and `pg_password` for recovery. A bootstrap script seeds those KV secrets. The public chart README still shows the Kubernetes Secret being created by hand.
 
 ## Helm on the management cluster
 
