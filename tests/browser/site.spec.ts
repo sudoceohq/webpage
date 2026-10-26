@@ -36,6 +36,24 @@ test('keyboard skip navigation reaches main content', async ({ page }) => {
   await page.keyboard.press('Enter');
   await expect(page.locator('main')).toBeFocused();
 });
+test('home offers freelance work below the hero and reuses contact', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByText(/Full-stack engineer focused on\s+DevOps and platform engineering/)).toBeVisible();
+  const freelance = page.getByRole('heading', { level: 2, name: /Freelance:\s*automation & infra/i });
+  const about = page.getByRole('heading', { level: 2, name: /Egor, in person/i });
+  const hello = page.getByRole('heading', { level: 2, name: /Say hello/i });
+  await expect(freelance).toBeVisible();
+  const [freelanceBox, aboutBox, helloBox, heroBox] = await Promise.all([
+    freelance.boundingBox(),
+    about.boundingBox(),
+    hello.boundingBox(),
+    page.getByRole('heading', { level: 1 }).boundingBox(),
+  ]);
+  expect(heroBox && freelanceBox && freelanceBox.y > heroBox.y).toBeTruthy();
+  expect(aboutBox && freelanceBox && freelanceBox.y > aboutBox.y).toBeTruthy();
+  expect(helloBox && freelanceBox && freelanceBox.y < helloBox.y).toBeTruthy();
+  await expect(page.getByRole('link', { name: /Let’s talk/i })).toHaveAttribute('href', '/contact/');
+});
 test('drafts are absent and contact is actionable', async ({ page, request }) => {
   await page.goto('/writing/');
   await expect(page.getByText('There are no published articles yet.', { exact: false })).toBeVisible();
