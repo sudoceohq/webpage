@@ -1,0 +1,130 @@
+---
+title: "Giving Kubernetes LoadBalancer IPs a real route: Cilium BGP to a home gateway, in stages"
+description: "I staged Cilium BGP so a Talos management cluster can advertise LoadBalancer IPs to a UniFi gateway, after a prefix-list update once left both cloud BGP sessions advertising nothing."
+pubDate: 2026-11-02
+status: draft
+origin: manual
+tags: [kubernetes, cilium, bgp, gitops, opentofu]
+sourceUrls:
+  - https://github.com/ThriftyStack/platform/pull/10
+---
+
+ThriftyStack is my hybrid homelab and cloud platform. A Talos management cluster, Argo CD GitOps in the public [ThriftyStack/platform](https://github.com/ThriftyStack/platform) repo, OpenTofu for the network and the gateway. I needed Services of type LoadBalancer to get addresses that my home UniFi gateway, running FRR and bgpd, would actually route.
+
+The cluster side of that is merged. The gateway side is still two open PRs in a private repo. I split them on purpose. The lesson I keep relearning with BGP is simple: land definitions before anything references them, then wait until the daemon has really reloaded before you trust a check.
+
+## Cluster first, objects only
+
+On 30 October 2026 I merged [platform PR #10](https://github.com/ThriftyStack/platform/pull/10). It does not create a LoadBalancer Service. It does not turn on the Cilium daemon. Bootstrap already owns the daemon and enabling `bgpControlPlane`. The platform repo only declares the objects.
+
+A new Helm chart ships four of them:
+
+- a `CiliumLoadBalancerIPPool`, a small /28 from an unused internal range
+- a `CiliumBGPAdvertisement` that advertises only `LoadBalancerIP` addresses of Services that carry an opt-in label. PodCIDR is not advertised.
+- a `CiliumBGPPeerConfig` for IPv4 unicast, graceful restart 15s, hold 9s, keepalive 3s
+- a `CiliumBGPClusterConfig` that peers the nodes with the gateway
+
+I am not handing the home network a route to every pod. LoadBalancer IPs are the thing I want the gateway to know about, and only for Services that opt in. Everything else can stay inside the cluster.
+
+Illustrative shape, documentation-range values, not the real ones:
+
+```yaml
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: mgmt-internal
+spec:
+  blocks:
+    - cidr: 192.0.2.0/28
+```
+
+```yaml
+apiVersion: cilium.io/v2
+kind: CiliumBGPAdvertisement
+metadata:
+  name: mgmt-lb
+  labels:
+    advertise: bgp
+spec:
+  advertisements:
+    - advertisementType: Service
+      service:
+        addresses:
+          - LoadBalancerIP
+```
+
+```yaml
+apiVersion: cilium.io/v2
+kind: CiliumBGPPeerConfig
+metadata:
+  name: gateway
+spec:
+  families:
+    - afi: ipv4
+      safi: unicast
+      advertisements:
+        matchLabels:
+          advertise: bgp
+  gracefulRestart:
+    enabled: true
+    restartTimeSeconds: 15
+  timers:
+    holdTimeSeconds: 9
+    keepAliveTimeSeconds: 3
+```
+
+The cluster config uses private ASNs on both sides and a `peerConfigRef` to that peer config. I am not putting those numbers here.
+
+The chart is its own Argo CD stage, `bgp`, at sync wave 90, after the Authentik control plane at 80. Inside the chart, the pool, advertisement, and peer config sync at wave 0. The cluster config waits for wave 1 because it references the peer config. Prune and delete stay off. Self-heal stays on. `SkipDryRunOnMissingResource` is set because the CRDs come from bootstrap, not from this chart.
+
+The management AppProject allowlist gained the four cluster-scoped `cilium.io` kinds. `kube-system` stays forbidden. Offline contract tests (`make check`) assert the pool, the private ASNs, and that `LoadBalancerIP` is the only advertised address type.
+
+That is the cluster half. A Service can take an address from the pool. Nothing will route it until the gateway agrees.
+
+## The empty prefix-list
+
+bgpd keeps its own copy of a prefix-list, separate from zebra. I learned that the hard way on 29 August 2026. I uploaded a prefix-list and bound it to the cloud neighbours' route-maps in the same change. bgpd's copy of the list came up empty. Both cloud BGP sessions, one to GCP and one to OCI, stayed Established and advertised zero prefixes.
+
+The OpenTofu UniFi resource rewrites the whole FRR config on every apply. bgpd re-reads that config minutes later. A check right after apply still shows the previous generation. If you bind a new list in the same change that creates it, you can attach an empty object and not notice until the daemon catches up.
+
+The failure signature in `vtysh` is specific. A route-map is invoked, a clause inside it shows `Invoked 0`. The map ran. The prefix-list it called had nothing in it.
+
+I am not doing that again for the Cilium peer.
+
+## Two gateway PRs, on purpose
+
+The gateway work lives in a private repo. I will not link it. It is split into two PRs, still open.
+
+Stage 1 only defines things nobody references yet:
+
+- a `cilium-lb` prefix-list
+- a `cilium-in` route-map that permits only the pool and denies everything else
+- a `cilium-out` route-map that denies everything, so the gateway never sends routes to the cluster
+
+Illustrative FRR, again with documentation-range values:
+
+```
+ip prefix-list cilium-lb seq 10 permit 192.0.2.0/28
+!
+route-map cilium-in permit 10
+ match ip address prefix-list cilium-lb
+route-map cilium-in deny 20
+!
+route-map cilium-out deny 10
+```
+
+Tests assert those definitions exist, that they are not attached, and that the pool prefix never leaks into the prefix-lists and route-maps the cloud neighbours already use. Then I apply, wait for a full bgpd reload, and verify with vtysh: prefix-list contents, route-map invocation counts, cloud neighbours still Established with the same prefix counts, pool prefix absent from their advertised routes. `Invoked 0` on a clause while its map is invoked is the empty-list failure I already hit. I want to see it before anything points at these objects, not after.
+
+Only then does stage 2 attach the Cilium peer-group, the neighbours, and the TCP/179 firewall rule.
+
+Rollback for stage 1 is boring, which is the point. The objects are unreferenced. If they are wrong, nothing is using them. If they are right, attaching them is a small, separate change.
+
+I used to treat "the apply succeeded" as "the routing daemon agrees with me." It does not. FRR will take a rewritten config and keep serving the last generation until it reloads. BGP will keep a session Established while advertising nothing. A green apply plus a fast `vtysh` check is how I shipped an empty prefix-list to GCP and OCI in one go.
+
+## Not up yet
+
+The cluster objects are in Git and merged. Gateway stages 1 and 2 are still open PRs. The BGP session is not up. There is no LoadBalancer Service yet.
+
+Next: apply stage 1, wait for bgpd to reload, verify. Then attach. Then `cilium bgp peers`, and the first real LoadBalancer Service.
+
+BGP does not forgive a definition and a reference landing together. Stage them. Wait for the daemon. Then look.
