@@ -36,23 +36,53 @@ test('keyboard skip navigation reaches main content', async ({ page }) => {
   await page.keyboard.press('Enter');
   await expect(page.locator('main')).toBeFocused();
 });
-test('home offers freelance work below the hero and reuses contact', async ({ page }) => {
+const roleDescription = 'Egor Markowskij, also known as Sudoceo. Junior DevOps and platform engineer. Selected work, writing, and contact.';
+const contactCta = 'Roles and collaboration';
+const withdrawn = ['Freelance', 'AI/LLM', 'paid freelance', 'Let’s talk', "Let's talk", 'Talos', 'Ansible', 'GCP', 'sudoceohq/argocd', 'I lead', 'I architect', 'Management GitOps'];
+
+test('home presents junior platform work and does not sell freelance automation', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText(/Full-stack engineer focused on\s+DevOps and platform engineering/)).toBeVisible();
-  const freelance = page.getByRole('heading', { level: 2, name: /Freelance:\s*automation & infra/i });
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', roleDescription);
+  await expect(page.locator('.hero-intro')).toHaveText('Junior DevOps and platform engineer.');
+  await expect(page.getByRole('heading', { name: /Freelance/i })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /ThriftyStack and earlier work/ })).toHaveAttribute('href', '/work/#thriftystack');
   const about = page.getByRole('heading', { level: 2, name: /Egor, in person/i });
-  const hello = page.getByRole('heading', { level: 2, name: /Say hello/i });
-  await expect(freelance).toBeVisible();
-  const [freelanceBox, aboutBox, helloBox, heroBox] = await Promise.all([
-    freelance.boundingBox(),
+  const roles = page.getByRole('heading', { level: 2, name: 'Open roles.' });
+  await expect(roles).toBeVisible();
+  const [aboutBox, rolesBox, heroBox] = await Promise.all([
     about.boundingBox(),
-    hello.boundingBox(),
+    roles.boundingBox(),
     page.getByRole('heading', { level: 1 }).boundingBox(),
   ]);
-  expect(heroBox && freelanceBox && freelanceBox.y > heroBox.y).toBeTruthy();
-  expect(aboutBox && freelanceBox && freelanceBox.y > aboutBox.y).toBeTruthy();
-  expect(helloBox && freelanceBox && freelanceBox.y < helloBox.y).toBeTruthy();
-  await expect(page.getByRole('link', { name: /Let’s talk/i })).toHaveAttribute('href', '/contact/');
+  expect(heroBox && aboutBox && aboutBox.y > heroBox.y).toBeTruthy();
+  expect(aboutBox && rolesBox && rolesBox.y > aboutBox.y).toBeTruthy();
+  const body = await page.locator('body').innerText();
+  for (const phrase of withdrawn) expect(body, phrase).not.toContain(phrase);
+});
+
+test('work leads with the public ThriftyStack repository', async ({ page }) => {
+  await page.goto('/work/');
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', 'Selected work by Egor Markowskij. ThriftyStack is the main public project.');
+  const titles = page.locator('article h3');
+  await expect(titles).toHaveText(['ThriftyStack', 'Document Recognition & Review', 'Provider-Agnostic OCR Engine', 'LibraCircu']);
+  await expect(page.getByRole('link', { name: 'Platform repository on GitHub' })).toHaveAttribute('href', 'https://github.com/ThriftyStack/platform');
+  await expect(page.getByRole('link', { name: contactCta })).toHaveAttribute('href', '/contact/');
+  const body = await page.locator('body').innerText();
+  for (const phrase of withdrawn) expect(body, phrase).not.toContain(phrase);
+  expect(body).toContain('not a verified production deployment');
+});
+
+test('about and contact ask for roles and collaboration', async ({ page }) => {
+  await page.goto('/about/');
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', roleDescription);
+  await expect(page.getByText('Junior DevOps and platform engineer.')).toBeVisible();
+  await expect(page.getByText('Full Stack Engineer · June–August 2026', { exact: false })).toBeVisible();
+  await expect(page.getByRole('link', { name: contactCta })).toHaveAttribute('href', '/contact/');
+  await page.goto('/contact/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Open roles.' })).toBeVisible();
+  await expect(page.getByText('Junior DevOps and platform roles, and collaboration.')).toBeVisible();
+  const body = await page.locator('body').innerText();
+  for (const phrase of withdrawn) expect(body, phrase).not.toContain(phrase);
 });
 test('drafts are absent and contact is actionable', async ({ page, request }) => {
   await page.goto('/writing/');
