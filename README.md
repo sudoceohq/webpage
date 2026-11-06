@@ -78,6 +78,6 @@ GitHub check run [37998921517](https://github.com/sudoceohq/webpage/actions/runs
 
 ## Design and factual sources
 
-The design follows the supplied written “Modern Executive” direction: oversized black type, off-white canvas, asymmetric grids, editorial numbering, and restrained red. No reference image was available to inspect. Professional history, education, course certificates, languages, and OCR contribution descriptions were verified against the supplied LinkedIn profile. Project summaries were corroborated in LibraCircu, ThriftyStack, and the two OCR repositories. Private source repositories are not linked, and configuration does not imply a verified production deployment. The public Management GitOps entry links to `sudoceohq/argocd`.
+The design follows the supplied written “Modern Executive” direction: oversized black type, off-white canvas, asymmetric grids, editorial numbering, and restrained red. No reference image was available to inspect. Professional history, education, course certificates, languages, and OCR contribution descriptions were verified against the supplied LinkedIn profile. Project summaries were corroborated in LibraCircu, ThriftyStack, and the two OCR repositories. Private source repositories are not linked, and configuration does not imply a verified production deployment. The ThriftyStack entry links to https://github.com/ThriftyStack/platform. The old `sudoceohq/argocd` URL redirects there.
 
 Public contact: `egor.a.markowskij@sudoceo.com`. Adjust copy in `src/pages/` and identity settings in `src/lib/site.ts`.
